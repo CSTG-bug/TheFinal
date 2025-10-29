@@ -1,4 +1,5 @@
 @echo off
+chcp 65001 >NUL
 REM 一键上传（SSH 版，Windows BAT）
 REM 第一次请先设置 origin： git remote add origin git@github.com:你的用户名/你的仓库.git
 
