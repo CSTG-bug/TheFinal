@@ -1,20 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-随机森林回归
-========================================================================
-设计目标：
-  - 直接在代码里指定 4 个预处理CSV，运行即出结果
-  - 自动尝试两套目标：原始 y 与 log1p(y)（用 TransformedTargetRegressor 实现）
-  - 更合理的参数搜索空间 + RepeatedKFold(5x2)
-  - 以测试集 R² 为主指标（并列时用 MAPE 决胜）选**更优方案**
-  - 默认不落盘；满意后把 SAVE_OUTPUT=True 再保存所有产物
-
-如何提升 R² 的要点：
-  - 树数更多（n_estimators）+ 适当放开 max_depth
-  - 控制叶子规模（min_samples_leaf）抑制过拟合后反而能提高测试R²
-  - max_features 既试 'sqrt'/'log2' 也试连续比例（0.5/0.7），常见有提升
-  - 目标分布偏态时，log 版本常能涨分；不偏态则原始目标更好
+随机森林回归（RF）
+======================================================================
+特性：
+  - 直接在代码里指定 4 个预处理 CSV（X_train/X_test/y_train/y_test）
+  - 默认不保存任何文件（调参阶段更干净）；满意后切换 SAVE_OUTPUT=True 再落盘
+  - RandomizedSearchCV（默认）或 GridSearchCV（二选一）
+  - RepeatedKFold = 5x2 次交叉验证，更稳
+  - 更宽的参数搜索空间：n_estimators / max_depth / max_features / min_samples_* / bootstrap
+  - 可选目标对数变换（对偏态/重尾的目标常有用）
+  - 训练/测试：R²、MAPE、MAE、RMSE；可选保存最佳模型与CV明细、稳定性复跑
 """
 
 from pathlib import Path
@@ -24,32 +20,55 @@ import pandas as pd
 
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.compose import TransformedTargetRegressor
-from sklearn.model_selection import RepeatedKFold, RandomizedSearchCV
+from sklearn.model_selection import RepeatedKFold, GridSearchCV, RandomizedSearchCV
 from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
+from math import exp
 
-# ============ 【需修改路径】你的四个CSV ============
+# ===================== 全局设置（可改） =====================
+# 【需修改区域】：四个CSV路径
 X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\Element-UTS\output\Element-UTSX_train.csv"
 Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\Element-UTS\output\Element-UTSy_train.csv"
 X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\Element-UTS\output\Element-UTSX_test.csv"
 Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\Element-UTS\output\Element-UTSy_test.csv"
 
-# ============ 输出与保存（默认不落盘，调满意再改 True） ============
+# 输出目录 & 保存开关（默认不落盘）
 OUTPUT_DIR = Path(r"D:\MLDesignAl\TheFinal\RF\Element-UTS\output")
-SAVE_OUTPUT = False          # ← 调参阶段 False；满意后设 True 一次性落盘
-SAVE_MODEL = True            # SAVE_OUTPUT=True 时才生效
-SAVE_CV_RESULTS = True       # SAVE_OUTPUT=True 时才生效
+SAVE_OUTPUT = False        # ← 调参阶段建议 False；满意后改 True
+SAVE_MODEL = True          # 保存最佳模型 .joblib（在 SAVE_OUTPUT=True 时生效）
+SAVE_CV_RESULTS = True     # 保存完整CV结果（在 SAVE_OUTPUT=True 时生效）
+STABILITY_RUNS = 0         # 稳定性复跑次数（0=不复跑；建议满意后开 5 或 10）
 
-# ============ 搜索与验证配置（可以先用默认） ============
-SEED = 42
+# 搜索方式：随机/网格（随机更快、空间更大）
 USE_RANDOMIZED_SEARCH = True
-N_ITER = 80                  # 随机搜索抽样次数（60~120 常见，越大越稳）
-CV_SPLITS = 5
-CV_REPEATS = 2               # 想更稳可设 3；时间也会更长
+N_ITER_RANDOM_SEARCH = 50  # 随机搜索抽样次数（越大越稳，越慢）
 
-# ============ 公共函数：读数据 / 指标 ============
+# 交叉验证：5 折重复 2 次（更稳）
+CV_SPLITS = 5
+CV_REPEATS = 2
+
+# 目标对数变换（对偏态目标常见增益；不想用就设 False）
+DO_LOG_TARGET = True
+
+# 固定随机种子
+SEED = 42
+
+# ===================== 指标函数 =====================
+def mean_absolute_percentage_error(y_true, y_pred) -> float:
+    """MAPE（百分比），对 0 做保护避免除零。"""
+    y_true = np.array(y_true, dtype=float)
+    y_pred = np.array(y_pred, dtype=float)
+    y_true = np.where(y_true == 0, 1e-10, y_true)
+    return float(np.mean(np.abs((y_true - y_pred) / y_true)) * 100.0)
+
+# ===================== 读取数据 =====================
 def read_xy_files(x_train_path, y_train_path, x_test_path, y_test_path):
-    """读取预处理后的四个CSV；返回矩阵与列名"""
+    """
+    读取预处理输出的四个 CSV：
+      - X_train/X_test：保留列名（重要性输出用）
+      - y_train/y_test：第一列为目标
+    返回：X_train(np.ndarray), y_train(np.ndarray), X_test(np.ndarray), y_test(np.ndarray), feature_names(list)
+    """
     X_train_df = pd.read_csv(x_train_path)
     X_test_df = pd.read_csv(x_test_path)
     y_train = pd.read_csv(y_train_path).iloc[:, 0].to_numpy().reshape(-1)
@@ -57,145 +76,195 @@ def read_xy_files(x_train_path, y_train_path, x_test_path, y_test_path):
     feature_names = X_train_df.columns.tolist()
     return X_train_df.to_numpy(), y_train, X_test_df.to_numpy(), y_test, feature_names
 
-def mape(y_true, y_pred) -> float:
-    """MAPE（百分比），对 0 做保护避免除零。"""
-    y_true = np.array(y_true, dtype=float)
-    y_pred = np.array(y_pred, dtype=float)
-    y_true = np.where(y_true == 0, 1e-10, y_true)
-    return float(np.mean(np.abs((y_true - y_pred) / y_true)) * 100.0)
+# ===================== 训练 & 评估 =====================
+def train_eval_rf(
+    X_train, y_train, X_test, y_test, feature_names,
+    outdir: Path
+):
+    """
+    1) 选择搜索器（随机/网格），定义参数空间
+    2) RepeatedKFold 交叉验证
+    3) 搜索最佳参数 → 拟合全训练集
+    4) 计算训练/测试指标（R²、MAPE、MAE、RMSE）
+    5) 视开关决定是否落盘（metrics / predictions / importances / cv_results / model）
+    """
 
-# ============ 核心：给“一个模型对象 + 参数空间”做搜索并返回指标 ============
-def search_and_score(model, param_space, X_train, y_train, X_test, y_test,
-                     feature_names, tag: str, outdir: Path):
-    """
-    入参：
-      - model: 可以是 RF 本体，也可以是 TTR(regressor=RF)
-      - param_space: 与 model 对应的参数空间（注意前缀是否需要 regressor__）
-      - tag: 用于区分“原始目标”与“对数目标”的名字，打印友好
-    返回：
-      - dict：包含 训练/测试 R²、MAPE、MAE、RMSE、best_params、cv_best_r2 等
-      - best_model：已在全训练集拟合好的最佳模型
-    """
+    # ---- 参数空间（随机搜索用列表做分布，方便控制）----
+    param_space = {
+        "n_estimators":   [300, 500, 700, 900, 1200],
+        "max_depth":      [None, 15, 20, 30, 40, 50],
+        "min_samples_split": [2, 5, 10, 20],
+        "min_samples_leaf":  [1, 2, 4, 8],
+        "max_features":   ["sqrt", "log2", None, 0.7, 0.5],
+        "bootstrap":      [True],  # OOB 评估只在 bootstrap=True 生效
+        "random_state":   [SEED],  # 固定随机性（搜索器不会改它）
+        "n_jobs":         [-1],    # 并行
+    }
+
+    # ---- 构建基模型 ----
+    base_rf = RandomForestRegressor(random_state=SEED, n_jobs=-1, bootstrap=True, oob_score=True)
+
+    # ---- 可选目标变换：log1p ↔ expm1（避免负值问题建议先确认 y≥0）----
+    if DO_LOG_TARGET:
+        # TransformedTargetRegressor 会在内部对 y 做 log1p，预测后再 expm1 还原
+        model = TransformedTargetRegressor(
+            regressor=base_rf,
+            func=np.log1p,
+            inverse_func=np.expm1
+        )
+        # 需要把参数名加前缀 'regressor__'
+        param_space = {f"regressor__{k}": v for k, v in param_space.items()}
+        oob_attr = "regressor__oob_score_"  # 仅用于提示
+    else:
+        model = base_rf
+        oob_attr = "oob_score_"
+
+    # ---- 交叉验证器（更稳）----
     cv = RepeatedKFold(n_splits=CV_SPLITS, n_repeats=CV_REPEATS, random_state=SEED)
-    searcher = RandomizedSearchCV(
-        estimator=model,
-        param_distributions=param_space,
-        n_iter=N_ITER,
-        cv=cv,
-        scoring="r2",
-        random_state=SEED,
-        n_jobs=-1,
-        refit=True
-    )
+
+    # ---- 搜索器 ----
+    if USE_RANDOMIZED_SEARCH:
+        searcher = RandomizedSearchCV(
+            estimator=model,
+            param_distributions=param_space,
+            n_iter=N_ITER_RANDOM_SEARCH,
+            cv=cv,
+            scoring="r2",
+            random_state=SEED,
+            n_jobs=-1,
+            refit=True
+        )
+    else:
+        searcher = GridSearchCV(
+            estimator=model,
+            param_grid=param_space,
+            cv=cv,
+            scoring="r2",
+            n_jobs=-1,
+            refit=True
+        )
+
+    # ---- 搜索 + 拟合 ----
     searcher.fit(X_train, y_train)
 
+    # ---- 提取最佳模型与参数 ----
     best_model = searcher.best_estimator_
     best_params = searcher.best_params_
     cv_best_r2 = float(searcher.best_score_)
 
-    # 预测与指标
+    # ---- 最终拟合（searcher.refit=True 已做过；这里确保拿到训练好的对象）----
+    # 预测
     y_pred_train = best_model.predict(X_train)
     y_pred_test  = best_model.predict(X_test)
 
+    # ---- 指标 ----
     metrics = {
-        "tag": tag,
+        "model": "RandomForestRegressor",
+        "use_randomized_search": USE_RANDOMIZED_SEARCH,
+        "cv_scheme": f"RepeatedKFold({CV_SPLITS}x{CV_REPEATS})",
+        "best_params": best_params,
         "cv_best_r2": cv_best_r2,
         "train_r2": float(r2_score(y_train, y_pred_train)),
-        "train_mape": mape(y_train, y_pred_train),
+        "train_mape": mean_absolute_percentage_error(y_train, y_pred_train),
         "train_mae": float(mean_absolute_error(y_train, y_pred_train)),
         "train_rmse": float(np.sqrt(mean_squared_error(y_train, y_pred_train))),
         "test_r2": float(r2_score(y_test, y_pred_test)),
-        "test_mape": mape(y_test, y_pred_test),
+        "test_mape": mean_absolute_percentage_error(y_test, y_pred_test),
         "test_mae": float(mean_absolute_error(y_test, y_pred_test)),
         "test_rmse": float(np.sqrt(mean_squared_error(y_test, y_pred_test))),
-        "best_params": best_params,
         "n_train": int(len(y_train)),
-        "n_test": int(len(y_test))
+        "n_test": int(len(y_test)),
+        "log_target": DO_LOG_TARGET
     }
 
-    # 打印摘要
-    print(f"\n=== {tag}：测试集性能 ===")
+    # ---- 打印 OOB 分数（仅在 bootstrap=True 时可用；在 TTR 包裹下需取内部 rf）----
+    try:
+        if DO_LOG_TARGET:
+            rf_inner = best_model.regressor_
+        else:
+            rf_inner = best_model
+        if getattr(rf_inner, "oob_score_", None) is not None:
+            print(f"OOB R²: {rf_inner.oob_score_:.4f}")
+            metrics["oob_r2"] = float(rf_inner.oob_score_)
+    except Exception:
+        pass
+
+    # ---- 控制台摘要 ----
+    print("\n=== RF 优化版：测试集性能 ===")
     print(f"R²   : {metrics['test_r2']:.4f}")
     print(f"MAPE : {metrics['test_mape']:.2f}%")
     print(f"MAE  : {metrics['test_mae']:.4f}")
     print(f"RMSE : {metrics['test_rmse']:.4f}")
     print(f"CV(best R²): {metrics['cv_best_r2']:.4f}")
+    if "oob_r2" in metrics:
+        print(f"OOB R²     : {metrics['oob_r2']:.4f}")
 
-    # 按需落盘
+    # ---- 只在 SAVE_OUTPUT=True 时落盘 ----
     if SAVE_OUTPUT:
         outdir.mkdir(parents=True, exist_ok=True)
-        # metrics
-        with open(outdir / f"RF_{tag}_metrics.json", "w", encoding="utf-8") as f:
+
+        # 1) metrics.json
+        with open(outdir / "RF_metrics.json", "w", encoding="utf-8") as f:
             json.dump(metrics, f, ensure_ascii=False, indent=2)
-        # predictions
-        y_pred = best_model.predict(X_test)
-        ape = np.abs((y_test - y_pred) / np.where(y_test == 0, 1e-10, y_test)) * 100.0
-        pd.DataFrame({"y_test": y_test, "y_pred": y_pred, "APE_percent": ape}).to_csv(
-            outdir / f"RF_{tag}_predictions.csv", index=False
+
+        # 2) predictions.csv
+        ape = np.abs((y_test - y_pred_test) / np.where(y_test == 0, 1e-10, y_test)) * 100.0
+        pd.DataFrame({"y_test": y_test, "y_pred": y_pred_test, "APE_percent": ape}).to_csv(
+            outdir / "RF_predictions.csv", index=False
         )
-        # importances（取内部 RF）
-        rf_inner = best_model.regressor_ if isinstance(best_model, TransformedTargetRegressor) else best_model
+
+        # 3) importances.csv（特征重要性）
         importances = getattr(rf_inner, "feature_importances_", np.zeros(len(feature_names)))
         pd.DataFrame({"feature": feature_names, "importance": importances}).sort_values(
             "importance", ascending=False
-        ).to_csv(outdir / f"RF_{tag}_importances.csv", index=False)
-        # cv results
+        ).to_csv(outdir / "RF_importances.csv", index=False)
+
+        # 4) 完整 CV 结果（便于复现/审稿）
         if SAVE_CV_RESULTS:
             cv_df = pd.DataFrame(searcher.cv_results_).sort_values("mean_test_score", ascending=False)
-            cv_df.to_csv(outdir / f"RF_{tag}_cv_results.csv", index=False)
-        # 保存模型
+            cv_df.to_csv(outdir / "RF_cv_results.csv", index=False)
+
+        # 5) 保存最佳模型
         if SAVE_MODEL:
-            dump(best_model, outdir / f"RF_{tag}_best_model.joblib")
+            dump(best_model, outdir / "RF_best_model.joblib")
 
-    return metrics, best_model
+        # 6) 稳定性复跑（不同 random_state）
+        if STABILITY_RUNS and STABILITY_RUNS > 0:
+            rows = []
+            # 从 best_params 中抽出 rf 的参数字典
+            def strip_prefix(d, prefix):
+                res = {}
+                for k, v in d.items():
+                    if k.startswith(prefix):
+                        res[k[len(prefix):]] = v
+                return res
 
-# ============ 主流程：两套目标都跑，自动挑更优 ============
+            if DO_LOG_TARGET:
+                rf_params = strip_prefix(best_params, "regressor__")
+            else:
+                rf_params = strip_prefix(best_params, "rf__") if "rf__n_estimators" in best_params else best_params
+
+            for i in range(STABILITY_RUNS):
+                rf = RandomForestRegressor(**rf_params, random_state=SEED + i, n_jobs=-1)
+                if DO_LOG_TARGET:
+                    ttr = TransformedTargetRegressor(regressor=rf, func=np.log1p, inverse_func=np.expm1)
+                    ttr.fit(X_train, y_train)
+                    y_pred = ttr.predict(X_test)
+                else:
+                    rf.fit(X_train, y_train)
+                    y_pred = rf.predict(X_test)
+                rows.append({"run_id": i + 1, "r2": float(r2_score(y_test, y_pred)),
+                             "mape": mean_absolute_percentage_error(y_test, y_pred)})
+            pd.DataFrame(rows).to_csv(outdir / "RF_stability_runs.csv", index=False)
+
+    return metrics
+
+# ===================== 主程序 =====================
 if __name__ == "__main__":
     # 读取数据
     X_train, y_train, X_test, y_test, feature_names = read_xy_files(
         X_TRAIN_PATH, Y_TRAIN_PATH, X_TEST_PATH, Y_TEST_PATH
     )
 
-    # 基础 RF（不包 TTR）：参数空间——无任何前缀
-    rf_base = RandomForestRegressor(random_state=SEED, n_jobs=-1, bootstrap=True)
-    param_space_raw = {
-        "n_estimators":       [400, 700, 900, 1200, 1400],
-        "max_depth":          [None, 20, 30, 40, 50],
-        "min_samples_split":  [2, 5, 10, 20],
-        "min_samples_leaf":   [1, 2, 4, 8],
-        "max_features":       ["sqrt", "log2", None, 0.5, 0.7],
-        "bootstrap":          [True],
-    }
-
-    # TTR(log) 版本：参数空间需要加前缀 regressor__
-    rf_log = TransformedTargetRegressor(
-        regressor=RandomForestRegressor(random_state=SEED, n_jobs=-1, bootstrap=True),
-        func=np.log1p, inverse_func=np.expm1
-    )
-    param_space_log = {f"regressor__{k}": v for k, v in param_space_raw.items()}
-
-    # 搜索与评估：原始目标
-    metrics_raw, model_raw = search_and_score(
-        rf_base, param_space_raw, X_train, y_train, X_test, y_test, feature_names,
-        tag="raw", outdir=OUTPUT_DIR
-    )
-    # 搜索与评估：对数目标
-    metrics_log, model_log = search_and_score(
-        rf_log, param_space_log, X_train, y_train, X_test, y_test, feature_names,
-        tag="log", outdir=OUTPUT_DIR
-    )
-
-    # 选更优（先比 test_r2，高者胜；若相同比 test_mape，小者胜）
-    def better(a, b):
-        if a["test_r2"] > b["test_r2"]:
-            return a
-        if a["test_r2"] < b["test_r2"]:
-            return b
-        return a if a["test_mape"] <= b["test_mape"] else b
-
-    best = better(metrics_raw, metrics_log)
-    print("\n================== 最终选择 ==================")
-    print(f"选择方案: {'原始目标(raw)' if best['tag']=='raw' else '对数目标(log)'}")
-    print(f"Test R² = {best['test_r2']:.4f} | Test MAPE = {best['test_mape']:.2f}%")
-    print("最佳参数：")
-    print(best["best_params"])
+    # 训练 + 评估（默认不保存任何文件）
+    metrics = train_eval_rf(X_train, y_train, X_test, y_test, feature_names, outdir=OUTPUT_DIR)
