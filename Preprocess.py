@@ -1,13 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-你可以【手动指定】输入特征列和目标列；不做自动列识别、不做自动稀有元素剔除、
-不做自动空列筛选（除非你选择相应开关）。默认也不做缺失值填补，若存在缺失会给出报错，
+你可以【手动指定】输入特征列和目标列；不做自动列识别。默认也不做缺失值填补，若存在缺失会给出报错，
 方便你在建库阶段自己清洗。
 
 功能要点
 --------
-1) 仅使用你通过 --features 指定的列作为输入特征；--target 指定目标列（默认 UTS）。
+1) 仅使用你通过 --features 指定的列作为输入特征；--target 指定目标列。
 2) 训练/测试划分（可分层，按目标值分箱；极端情况下自动回退成普通划分）。
 3) 可选标准化（--scale），默认开启；关闭就去掉任何缩放。
 4) 可选缺失值填补（--impute），默认 none（不填补，遇缺失直接报错）。
@@ -15,19 +14,6 @@
    - 预处理后的训练/测试集（CSV），文件名/路径你可完全自定义；
    - 可选保存一个 .npz（Numpy 格式）便于后续直接加载（--save-npz）。
 6) 集成 MAPE 函数（供后续评估脚本复用），本脚本不计算 MAPE/R2（建模阶段再算）。
-
-使用示例
---------
-# 最常见（含标准化，默认 impute=none，无缺失则直接成功）:
-python Preprocess.py \
-  --input /path/to/Origin-1293.xlsx \
-  --target UTS \
-  --features Si,Fe,Cu,Mn,Mg,Cr,Zn,V,Ti,Zr,Li,Ni,Be,Sc,Al,SS Temp,Ageing Temp,Ageing Time \
-  --test-size 0.3 \
-  --scale \
-  --outdir /path/to/out \
-  --prefix exp1_ \
-  --save-npz
 
 注意
 ----
@@ -59,7 +45,6 @@ def mean_absolute_percentage_error(y_true, y_pred) -> float:
     y_true = np.where(y_true == 0, 1e-10, y_true)
     return np.mean(np.abs((y_true - y_pred) / y_true)) * 100.0
 
-
 # -------------------------
 # 工具函数
 # -------------------------
@@ -70,7 +55,6 @@ def parse_feature_list(s: str) -> List[str]:
     """
     return [x.strip() for x in s.split(",") if x.strip()]
 
-
 def coerce_numeric(df: pd.DataFrame) -> pd.DataFrame:
     """
     将 DataFrame 中的列尽量转为数值（errors='coerce'），非数值会变为 NaN。
@@ -80,7 +64,6 @@ def coerce_numeric(df: pd.DataFrame) -> pd.DataFrame:
     for c in out.columns:
         out[c] = pd.to_numeric(out[c], errors="coerce")
     return out
-
 
 # -------------------------
 # 主流程
@@ -102,6 +85,9 @@ def preprocess(
     xtest_file: str | None = None,
     ytrain_file: str | None = None,
     ytest_file: str | None = None,
+    save_raw: bool = True,
+    xtrain_raw_file: str | None = None,
+    xtest_raw_file: str | None = None,
 ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
     返回：X_train, X_test, y_train, y_test
@@ -164,6 +150,9 @@ def preprocess(
         X, y, test_size=test_size, random_state=random_state, stratify=stratify
     )
 
+    X_train_raw = X_train.copy()
+    X_test_raw  = X_test.copy()
+
     # 特征缩放
     if do_scale:
         scaler = StandardScaler()
@@ -192,6 +181,11 @@ def preprocess(
         # 显式写出目标列名，便于后续识别
         y_train.to_csv(ytrain_path, index=False, header=[target_col])
         y_test.to_csv(ytest_path, index=False, header=[target_col])
+        if save_raw:
+            xtrain_raw_path = out_dir / (xtrain_raw_file if xtrain_raw_file else f"{prefix}X_train_raw.csv")
+            xtest_raw_path  = out_dir / (xtest_raw_file  if xtest_raw_file  else f"{prefix}X_test_raw.csv")
+            X_train_raw.to_csv(xtrain_raw_path, index=False)
+            X_test_raw.to_csv(xtest_raw_path, index=False)
 
     if save_npz:
         # 说明：npz 是 Numpy 的压缩打包格式，适合在 Python/NumPy/Sklearn 里快速加载；
@@ -205,6 +199,9 @@ def preprocess(
             feature_names=np.array(feature_cols, dtype=object),
             target_name=np.array([target_col], dtype=object),
             scaled=np.array([do_scale], dtype=bool),
+            # ★ 可选：追加原始
+            X_train_raw=X_train_raw.values,
+            X_test_raw=X_test_raw.values,
         )
 
     # 控制台报告
@@ -218,7 +215,6 @@ def preprocess(
     if save_npz:
         print(f"(已生成 {prefix}data.npz)")
 
-
 def build_argparser():
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", required=True, help="输入数据路径（CSV或XLSX）")
@@ -227,6 +223,9 @@ def build_argparser():
     ap.add_argument("--features", required=True, help="逗号分隔的特征列名列表，如：Si,Fe,Cu,Mn,Mg")
     ap.add_argument("--test-size", type=float, default=0.3, help="测试集比例（默认 0.3）")
     ap.add_argument("--random-state", type=int, default=SEED, help="随机种子（默认 42）")
+    ap.add_argument("--save-raw", action="store_true", help="同时保存未标准化的 X_train_raw/X_test_raw")
+    ap.add_argument("--xtrain-raw-file", default=None, help="原始 X_train 文件名（含扩展名）")
+    ap.add_argument("--xtest-raw-file", default=None, help="原始 X_test  文件名（含扩展名）")
 
     # 缩放与填补
     grp = ap.add_mutually_exclusive_group()
@@ -249,7 +248,6 @@ def build_argparser():
     ap.add_argument("--ytrain-file", default=None, help="y_train 文件名（含扩展名）")
     ap.add_argument("--ytest-file",  default=None, help="y_test 文件名（含扩展名）")
     return ap
-
 
 def main():
     ap = build_argparser()
@@ -274,6 +272,9 @@ def main():
         xtest_file=args.xtest_file,
         ytrain_file=args.ytrain_file,
         ytest_file=args.ytest_file,
+        save_raw=args.save_raw,
+        xtrain_raw_file=args.xtrain_raw_file,
+        xtest_raw_file=args.xtest_raw_file,
     )
 
 
@@ -287,7 +288,10 @@ if __name__ == "__main__":
         "--features", "Si,Fe,Cu,Mn,Mg,Cr,Zn,V,Ti,Zr,Li,Ni,Be,Sc,Ag,Al",
         "--test-size", "0.3",
         "--scale",
-        "--outdir", r"D:\MLDesignAl\TheFinal\Data\Element-UTS\output",
+        "--save-raw",
+        "--outdir", r"D:\MLDesignAl\TheFinal\Data\Element-UTS\test",
+        "--xtrain-raw-file", "Element-UTSX_train_raw.csv",
+        "--xtest-raw-file",  "Element-UTSX_test_raw.csv",
         "--prefix", "Element-UTS",
         "--save-npz"
     ]

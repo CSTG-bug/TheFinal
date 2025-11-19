@@ -1,0 +1,26 @@
+{
+  "model": "KNeighborsRegressor",
+  "scaler": "StandardScaler",
+  "params": {
+    "n_neighbors": 7,
+    "weights": "uniform",
+    "p": 2,
+    "leaf_size": 30,
+    "metric": "minkowski"
+  },
+  "n_train": 800,
+  "n_test": 344,
+  "n_features": 16,
+  "ytrain_mean": 395.12725,
+  "ytrain_std": 129.64938365621913,
+  "ytrain_min": 75.0,
+  "ytrain_max": 710.0,
+  "train_r2": 0.7557408618194977,
+  "train_mape": 14.89007062710434,
+  "train_mae": 45.43262499999999,
+  "train_rmse": 64.07606993660275,
+  "test_r2": 0.7155200020605127,
+  "test_mape": 16.452626684797504,
+  "test_mae": 49.52068106312292,
+  "test_rmse": 69.72548057343178
+}

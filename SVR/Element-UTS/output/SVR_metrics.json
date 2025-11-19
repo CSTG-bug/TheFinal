@@ -1,0 +1,25 @@
+{
+  "model": "SVR",
+  "scaler": "identity(passthrough)",
+  "params": {
+    "kernel": "rbf",
+    "C": 600.0,
+    "epsilon": 0.25,
+    "gamma": 0.03
+  },
+  "n_train": 800,
+  "n_test": 344,
+  "n_features": 16,
+  "ytrain_mean": 395.12725,
+  "ytrain_std": 129.64938365621913,
+  "ytrain_min": 75.0,
+  "ytrain_max": 710.0,
+  "train_r2": 0.7706410961927075,
+  "train_mape": 13.465110373520098,
+  "train_mae": 39.20500491464953,
+  "train_rmse": 62.09094342157761,
+  "test_r2": 0.7225351209248037,
+  "test_mape": 15.581266464586935,
+  "test_mae": 46.20503471994586,
+  "test_rmse": 68.8604184699027
+}
