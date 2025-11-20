@@ -283,16 +283,16 @@ if __name__ == "__main__":
     import sys
     sys.argv = [
         "Preprocess.py",
-        "--input", r"D:\MLDesignAl\TheFinal\Data\Element-UTS\Element-UTS.xlsx",
+        "--input", r"D:\MLDesignAl\TheFinal\Data\Element-UTS-ZL\Element-UTS-ZL.xlsx",
         "--target", "UTS",
-        "--features", "Si,Fe,Cu,Mn,Mg,Cr,Zn,V,Ti,Zr,Li,Ni,Be,Sc,Ag,Al",
+        "--features", "Si,Cu,Mn,Mg,Cr,Zn,Ti,Ni,Ag,Al",
         "--test-size", "0.3",
         "--scale",
         "--save-raw",
-        "--outdir", r"D:\MLDesignAl\TheFinal\Data\Element-UTS\test",
-        "--xtrain-raw-file", "Element-UTSX_train_raw.csv",
-        "--xtest-raw-file",  "Element-UTSX_test_raw.csv",
-        "--prefix", "Element-UTS",
+        "--outdir", r"D:\MLDesignAl\TheFinal\Data\Element-UTS-ZL\output",
+        "--xtrain-raw-file", "Element-UTS-ZLX_train_raw.csv",
+        "--xtest-raw-file",  "Element-UTS-ZLX_test_raw.csv",
+        "--prefix", "Element-UTS-ZL",
         "--save-npz"
     ]
     main()
