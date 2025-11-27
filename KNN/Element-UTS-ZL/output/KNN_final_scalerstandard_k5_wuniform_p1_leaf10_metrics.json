@@ -1,0 +1,23 @@
+{
+  "scaler": "standard",
+  "params": {
+    "n_neighbors": 5,
+    "weights": "uniform",
+    "p": 1,
+    "leaf_size": 10,
+    "metric": "minkowski"
+  },
+  "cv_r2": 0.0847688101513302,
+  "cv_std": 0.23662945180463962,
+  "train_r2": 0.6216933147333406,
+  "train_mape": 16.8195508067459,
+  "train_mae": 41.21739130434783,
+  "train_rmse": 48.29618762521981,
+  "test_r2": 0.6485306846399432,
+  "test_mape": 15.1606348191107,
+  "test_mae": 38.36363636363637,
+  "test_rmse": 45.244788750649604,
+  "n_train": 23,
+  "n_test": 11,
+  "n_features": 10
+}
