@@ -1,0 +1,21 @@
+{
+  "model": "DecisionTreeRegressor",
+  "best_params": {
+    "max_depth": 10,
+    "max_features": null,
+    "min_samples_leaf": 1,
+    "min_samples_split": 5
+  },
+  "cv_best_r2": 0.29276862570391005,
+  "train_r2": 0.5900947768999989,
+  "train_mape": 26.003493951868922,
+  "train_mae": 2.7791585728701165,
+  "train_rmse": 3.798418044599574,
+  "test_r2": 0.21505993902385312,
+  "test_mape": 34.214437475055846,
+  "test_mae": 3.49241755682148,
+  "test_rmse": 4.927308954881174,
+  "n_train": 775,
+  "n_test": 333,
+  "random_state": 42
+}
