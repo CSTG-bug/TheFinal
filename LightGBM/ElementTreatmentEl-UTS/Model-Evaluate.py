@@ -18,14 +18,14 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
 
 # =========【必改 1】四个预处理 CSV 路径 =========
-X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_train.csv"
-Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_train.csv"
-X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_test.csv"
-Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_test.csv"
+X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train.csv"
+Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_train.csv"
+X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_test.csv"
+Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_test.csv"
 
 # =========【必改 2】运行模式与输出 =========
 MANUAL_TUNE = False   # 调参期设 True；确定参数后改 False
-OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\LightGBM\ElementTreatmentEl-UTS\output")
+OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\LightGBM\ElementTreatmentEl-UTS\output-exceptEL")
 
 # ========= 保存策略（只在 MANUAL_TUNE=False 时生效）=========
 MASTER_SAVE_SWITCH = True
@@ -44,42 +44,42 @@ CV_REPEATS = 2
 # =========【必改 3A】手动调参参数组 =========
 MANUAL_TRIALS = [
     {
-        "n_estimators": 1211,"num_leaves": 17,"max_depth": 13,"learning_rate": 0.05,"subsample": 0.2,
-        "colsample_bytree": 0.8,"min_child_samples": 11,"reg_lambda": 1.0,"reg_alpha": 0.1,
+        "n_estimators": 2700,"num_leaves": 30,"max_depth": 5,"learning_rate": 0.05,"subsample": 0.6,
+        "colsample_bytree": 0.8,"min_child_samples": 4,"reg_lambda": 1.0,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1211,"num_leaves": 17,"max_depth": 13,"learning_rate": 0.05,"subsample": 0.2,
-        "colsample_bytree": 0.8,"min_child_samples": 11,"reg_lambda": 1.0,"reg_alpha": 0.2,
+        "n_estimators": 2700,"num_leaves": 30,"max_depth": 5,"learning_rate": 0.05,"subsample": 0.6,
+        "colsample_bytree": 0.8,"min_child_samples": 4,"reg_lambda": 1.0,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1211,"num_leaves": 17,"max_depth": 13,"learning_rate": 0.05,"subsample": 0.2,
-        "colsample_bytree": 0.8,"min_child_samples": 11,"reg_lambda": 1.0,"reg_alpha": 0.3,
+        "n_estimators": 2700,"num_leaves": 30,"max_depth": 5,"learning_rate": 0.05,"subsample": 0.6,
+        "colsample_bytree": 0.8,"min_child_samples": 4,"reg_lambda": 1.0,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1211,"num_leaves": 17,"max_depth": 13,"learning_rate": 0.05,"subsample": 0.2,
-        "colsample_bytree": 0.8,"min_child_samples": 11,"reg_lambda": 1.0,"reg_alpha": 0.4,
+        "n_estimators": 2700,"num_leaves": 30,"max_depth": 5,"learning_rate": 0.05,"subsample": 0.6,
+        "colsample_bytree": 0.8,"min_child_samples": 4,"reg_lambda": 1.0,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1211,"num_leaves": 17,"max_depth": 13,"learning_rate": 0.05,"subsample": 0.2,
-        "colsample_bytree": 0.8,"min_child_samples": 11,"reg_lambda": 1.0,"reg_alpha": 0.5,
+        "n_estimators": 2700,"num_leaves": 30,"max_depth": 5,"learning_rate": 0.05,"subsample": 0.6,
+        "colsample_bytree": 0.8,"min_child_samples": 4,"reg_lambda": 1.0,"reg_alpha": 0.2,
     },
 ]
 
 # =========【必改 3B】最终参数 =========
 FINAL_PARAMS = {
-    "n_estimators": 1211,
-    "num_leaves": 17,
-    "max_depth": 13,
+    "n_estimators": 2700,
+    "num_leaves": 30,
+    "max_depth": 5,
     "learning_rate": 0.05,
-    "subsample": 0.2,
+    "subsample": 0.6,
     "colsample_bytree": 0.8,
-    "min_child_samples": 11,
+    "min_child_samples": 4,
     "reg_lambda": 1.0,
-    "reg_alpha": 0.5,
+    "reg_alpha": 0.2,
 }
 
 # ========= 工具函数 =========

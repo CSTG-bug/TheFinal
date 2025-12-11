@@ -27,14 +27,14 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
 
 # =========【必改 1】四个预处理 CSV 路径 =========
-X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_train.csv"
-Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_train.csv"
-X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_test.csv"
-Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_test.csv"
+X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train.csv"
+Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_train.csv"
+X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_test.csv"
+Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_test.csv"
 
 # =========【必改 2】运行模式与输出目录 =========
 MANUAL_TUNE = False                                 # 调参期 True；确定参数后改 False
-OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\KNN\ElementTreatmentEl-UTS\output")
+OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\KNN\ElementTreatmentEl-UTS\output-exceptEL")
 
 # ========= 保存策略（只在 MANUAL_TUNE=False 分支里生效）=========
 MASTER_SAVE_SWITCH = True                         # 满意后改 True 才允许落盘
@@ -62,21 +62,21 @@ def get_scaler(name: str):
 
 # =========【必改 3A】手动调参参数组（MANUAL_TUNE=True 时使用）=========
 MANUAL_TRIALS = [
-    {"n_neighbors": 2, "weights": "distance",  "p": 2,   "leaf_size": 5},
+    {"n_neighbors": 4, "weights": "distance",  "p": 2,   "leaf_size": 10},
 
-    {"n_neighbors": 2, "weights": "distance",  "p": 2,   "leaf_size": 10},
+    {"n_neighbors": 4, "weights": "distance",  "p": 2,   "leaf_size": 10},
 
-    {"n_neighbors": 2, "weights": "distance",  "p": 2,   "leaf_size": 15},
+    {"n_neighbors": 4, "weights": "distance",  "p": 2,   "leaf_size": 10},
 
-    {"n_neighbors": 2, "weights": "distance",  "p": 2,   "leaf_size": 20},
+    {"n_neighbors": 4, "weights": "distance",  "p": 2,   "leaf_size": 10},
 ]
 
 # =========【必改 3B】最终参数（MANUAL_TUNE=False 时使用）=========
 FINAL_PARAMS = {
-    "n_neighbors": 2,
+    "n_neighbors": 4,
     "weights": "distance",
     "p": 2,
-    "leaf_size": 5,
+    "leaf_size": 10,
     "metric": "minkowski",
 }
 FINAL_SCALER = 'identity'   # 最终采用的缩放器：'standard' / 'minmax' / 'robust' / 'identity'

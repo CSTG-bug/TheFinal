@@ -22,14 +22,14 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
 
 # =========【必改 1】你的四个预处理 CSV 路径 =========
-X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output\ElementTreatment-UTS-X_train.csv"
-Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output\ElementTreatment-UTS-y_train.csv"
-X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output\ElementTreatment-UTS-X_test.csv"
-Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output\ElementTreatment-UTS-y_test.csv"
+X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output-Processed\ElementTreatment-UTS-Processed-X_train.csv"
+Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output-Processed\ElementTreatment-UTS-Processed-y_train.csv"
+X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output-Processed\ElementTreatment-UTS-Processed-X_test.csv"
+Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatment-UTS\output-Processed\ElementTreatment-UTS-Processed-y_test.csv"
 
 # =========【必改 2】运行模式与输出 =========
 MANUAL_TUNE = False                      # 调参期设 True；确定参数后改 False
-OUTPUT_DIR = Path(r"D:\MLDesignAl\TheFinal\RF\ElementTreatment-UTS\output")
+OUTPUT_DIR = Path(r"D:\MLDesignAl\TheFinal\RF\ElementTreatment-UTS\output-Processed")
 
 # 保存策略（只在 MANUAL_TUNE=False 时生效）
 MASTER_SAVE_SWITCH = True              # 满意后改 True 才会真正落盘
@@ -48,23 +48,23 @@ CV_REPEATS = 2
 # =========【必改 3A】手动调参参数组（MANUAL_TUNE=True 才会用）=========
 MANUAL_TRIALS = [
 
-    {"n_estimators": 300, "max_features": 0.3, "max_depth": 20,
+    {"n_estimators": 268, "max_features": 0.1, "max_depth": 20,
      "min_samples_leaf": 1, "min_samples_split": 2, "bootstrap": True, "oob_score": True,
      "random_state": SEED, "n_jobs": -1},
 
-    {"n_estimators": 301, "max_features": 0.3, "max_depth": 20,
+    {"n_estimators": 269, "max_features": 0.1, "max_depth": 20,
      "min_samples_leaf": 1, "min_samples_split": 2, "bootstrap": True, "oob_score": True,
      "random_state": SEED, "n_jobs": -1},
 
-    {"n_estimators": 302, "max_features": 0.3, "max_depth": 20,
+    {"n_estimators": 270, "max_features": 0.1, "max_depth": 20,
      "min_samples_leaf": 1, "min_samples_split": 2, "bootstrap": True, "oob_score": True,
      "random_state": SEED, "n_jobs": -1},
 
-    {"n_estimators": 303, "max_features": 0.3, "max_depth": 20,
+    {"n_estimators": 271, "max_features": 0.1, "max_depth": 20,
      "min_samples_leaf": 1, "min_samples_split": 2, "bootstrap": True, "oob_score": True,
      "random_state": SEED, "n_jobs": -1},
 
-    {"n_estimators": 304, "max_features": 0.3, "max_depth": 20,
+    {"n_estimators": 272, "max_features": 0.1, "max_depth": 20,
      "min_samples_leaf": 1, "min_samples_split": 2, "bootstrap": True, "oob_score": True,
      "random_state": SEED, "n_jobs": -1},
 
@@ -72,8 +72,8 @@ MANUAL_TRIALS = [
 
 # =========【必改 3B】最终参数（MANUAL_TUNE=False 才会用）=========
 FINAL_PARAMS = {
-    "n_estimators": 304,
-    "max_features": 0.3,
+    "n_estimators": 271,
+    "max_features": 0.1,
     "max_depth": 20,
     "min_samples_leaf": 1,
     "min_samples_split": 2,

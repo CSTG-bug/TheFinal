@@ -1,0 +1,23 @@
+{
+  "scaler": "identity",
+  "params": {
+    "n_neighbors": 3,
+    "weights": "distance",
+    "p": 1,
+    "leaf_size": 5,
+    "metric": "minkowski"
+  },
+  "cv_r2": 0.5132495149370991,
+  "cv_std": 0.12673303899283306,
+  "train_r2": 0.9984248862032131,
+  "train_mape": 0.2937286025521319,
+  "train_mae": 0.03734061930783242,
+  "train_rmse": 0.2724442423863491,
+  "test_r2": 0.5829009358454462,
+  "test_mape": 36.49635642436554,
+  "test_mae": 2.85551248866984,
+  "test_rmse": 4.447205198385126,
+  "n_train": 366,
+  "n_test": 158,
+  "n_features": 22
+}

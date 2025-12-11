@@ -1,0 +1,26 @@
+{
+  "params": {
+    "n_estimators": 271,
+    "max_features": 0.1,
+    "max_depth": 20,
+    "min_samples_leaf": 1,
+    "min_samples_split": 2,
+    "bootstrap": true,
+    "oob_score": true,
+    "random_state": 42,
+    "n_jobs": -1
+  },
+  "cv_r2": 0.8628975729644672,
+  "cv_std": 0.024618077510652082,
+  "train_r2": 0.9831631256822693,
+  "train_mape": 2.476243880756946,
+  "train_mae": 10.225060142450667,
+  "train_rmse": 14.034211265662424,
+  "test_r2": 0.8549591177407341,
+  "test_mape": 7.144589937507441,
+  "test_mae": 29.602126145815006,
+  "test_rmse": 40.944114066821555,
+  "oob_r2": 0.8821127235133034,
+  "n_estimators": 271,
+  "n_features": 21
+}

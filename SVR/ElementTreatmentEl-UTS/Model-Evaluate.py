@@ -27,14 +27,14 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
 
 # =========【必改 1】四个预处理 CSV 路径 =========
-X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_train.csv"
-Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_train.csv"
-X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-X_test.csv"
-Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output\ElementTreatmentEl-UTS-y_test.csv"
+X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train.csv"
+Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_train.csv"
+X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_test.csv"
+Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_test.csv"
 
 # =========【必改 2】运行模式与输出目录 =========
 MANUAL_TUNE = False                                                     # 调参期 True；定型后改 False
-OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\SVR\ElementTreatmentEl-UTS\output")
+OUTPUT_DIR  = Path(r"D:\MLDesignAl\TheFinal\SVR\ElementTreatmentEl-UTS\output-exceptEL")
 
 # ========= 保存策略（Final 分支才生效）=========
 MASTER_SAVE_SWITCH = True                                            # 满意后改 True 才允许落盘
@@ -64,25 +64,25 @@ def get_scaler(name: str):
 
 # =========【必改 3A】手动调参参数组（MANUAL_TUNE=True 时使用）=========
 MANUAL_TRIALS = [
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.12},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.12},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.12},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.14},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.15},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 
-    {"kernel": "rbf", "C": 979, "epsilon": 0.01, "gamma": 0.16},
+    {"kernel": "rbf", "C": 425, "epsilon": 20.10, "gamma": 0.07},
 ]
 
 # =========【必改 3B】最终参数（MANUAL_TUNE=False 时使用）=========
 FINAL_PARAMS = {
     "kernel":  "rbf",
-    "C":       979.0,
-    "epsilon": 0.01,
-    "gamma":   0.12
+    "C":       425,
+    "epsilon": 20.10,
+    "gamma":   0.07
 }
 FINAL_SCALER = 'identity'     # 'standard' / 'minmax' / 'robust' / 'identity'
 
