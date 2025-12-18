@@ -26,9 +26,9 @@ from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
 from joblib import dump
 
 # =========【必改 1】四个预处理 CSV 路径 =========
-X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train.csv"
+X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train_raw.csv"
 Y_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_train.csv"
-X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_test.csv"
+X_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_test_raw.csv"
 Y_TEST_PATH  = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-y_test.csv"
 
 # =========【必改 2】运行模式与输出 =========
@@ -52,7 +52,7 @@ CV_REPEATS = 2   # 想更稳可以改 3；时间更久
 # =========【必改 3A】手动调参参数组（MANUAL_TUNE=True 才会用）=========
 MANUAL_TRIALS = [
     {
-        "n_estimators": 1599,"max_depth": 9,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
+        "n_estimators": 1599,"max_depth": 10,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
         "min_child_weight": 4,"gamma": 0.00,"reg_lambda": 2.1,"reg_alpha": 0.2,
     },
 
@@ -62,17 +62,17 @@ MANUAL_TRIALS = [
     },
 
     {
-        "n_estimators": 1599,"max_depth": 9,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
+        "n_estimators": 1599,"max_depth": 8,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
         "min_child_weight": 4,"gamma": 0.00,"reg_lambda": 2.1,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1599,"max_depth": 9,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
+        "n_estimators": 1599,"max_depth": 7,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
         "min_child_weight": 4,"gamma": 0.00,"reg_lambda": 2.1,"reg_alpha": 0.2,
     },
 
     {
-        "n_estimators": 1599,"max_depth": 9,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
+        "n_estimators": 1599,"max_depth": 6,"learning_rate": 0.03,"subsample": 0.6,"colsample_bytree": 1.0,
         "min_child_weight": 4,"gamma": 0.00,"reg_lambda": 2.1,"reg_alpha": 0.2,
     },
 ]
