@@ -38,6 +38,17 @@ TOP_K_TO_SAVE = 200             # 保存 UTS_pred 最高的前 K 条方案
 # 5) 设计空间的手动覆盖（可选）
 #    - 不写的特征将自动使用 raw X_train 的 min/max
 FEATURE_BOUNDS_OVERRIDE: Dict[str, Tuple[float, float]] = {
+    "Si": (0.0, 0.15),
+    "Fe": (0.0, 0.15),
+    "Cr": (0.0, 0.3),
+    "V" : (0.0, 0.1),
+    "Zr": (0.0, 0.2),
+    "Li": (0.0, 0.0),
+    "Ni": (0.0, 0.2),
+    "Sc": (0.0, 0.0),
+    "Ag": (0.0, 0.0),
+    "Bi": (0.0, 0.0),
+    "Pb": (0.0, 0.0),
     "Ageing Time": (0.0, 48.0),
     # "Si": (0.0, 2.0),
     # "Mg": (0.0, 2.0),
@@ -49,7 +60,7 @@ FEATURE_BOUNDS_OVERRIDE: Dict[str, Tuple[float, float]] = {
 
 # 6) GA 参数
 POP_SIZE = 200             # 每一代的个体数量
-N_GENERATIONS = 1250         # 迭代次数
+N_GENERATIONS = 1000         # 迭代次数
 ELITE_FRAC = 0.1           # 精英保留比例（前 10% 直接保留到下一代）
 TOURNAMENT_SIZE = 3        # 锦标赛选择的个体数量
 CROSSOVER_PROB = 0.9       # 发生交叉的概率
@@ -69,7 +80,7 @@ TARGET_SUM = 100.0
 
 AGEING_TIME_COL = "Ageing Time"
 AGEING_TIME_MAX = 48.0
-AGEING_TIME_STEP: Optional[float] = 0.5   # 例如 1.0=按 1h 步长；若不想离散化，改为 None
+AGEING_TIME_STEP: Optional[float] = None   # 例如 1.0=按 1h 步长；若不想离散化，改为 None
 
 # 可选：在 UTS 基本相同的情况下，轻微偏好更短的 Ageing Time（不改变“主目标是 UTS 最大化”）
 PREFER_SHORT_AGEING_TIME = True
