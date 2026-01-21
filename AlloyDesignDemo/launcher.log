@@ -1,0 +1,1 @@
+[launcher] streamlit crashed: ValueError('signal only works in main thread of the main interpreter')

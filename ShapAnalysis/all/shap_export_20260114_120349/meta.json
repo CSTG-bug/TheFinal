@@ -1,0 +1,17 @@
+{
+  "timestamp": "20260114_120349",
+  "model_path": "D:\\MLDesignAl\\TheFinal\\XGBoost\\ElementTreatmentEl-UTS\\output-exceptEL\\XGB_best_model.joblib",
+  "x_path": "D:\\MLDesignAl\\TheFinal\\ShapAnalysis\\all\\all.xlsx",
+  "out_dir": "D:\\MLDesignAl\\TheFinal\\ShapAnalysis\\all",
+  "model_type": "<class 'xgboost.sklearn.XGBRegressor'>",
+  "n_features": 21,
+  "n_samples": 524,
+  "background_size": 200,
+  "batch_size": 0,
+  "plot_sample": 3000,
+  "interaction": "auto",
+  "save_format": "parquet",
+  "feature_order_json": "",
+  "explainer_expected_value": 462.48642832127166,
+  "notes": "务必保证 X 的列顺序与训练一致；建议提供 FEATURE_ORDER_JSON 锁定顺序。"
+}

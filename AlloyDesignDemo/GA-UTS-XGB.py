@@ -19,12 +19,12 @@ import numpy as np
 import pandas as pd
 from joblib import load
 
-# ====================== 配置区 ======================
+# ====================== 配置区（需要根据你的项目修改） ======================
 
 # 1) 原始 X_train（未标准化版本）的路径 —— 用于估计范围 & 特征名
 RAW_X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train_raw.csv"
 
-# 2) 训练好的 XGBoost 模型路径
+# 2) 训练好的 XGBoost 模型路径（你之前保存的 XGB_best_model.joblib）
 MODEL_PATH = r"D:\MLDesignAl\TheFinal\XGBoost\ElementTreatmentEl-UTS\output-exceptEL\XGB_best_model.joblib"
 
 # 3) 结果输出目录
@@ -32,12 +32,23 @@ OUTPUT_DIR = Path(r"D:\MLDesignAl\TheFinal\DesignSearch\GA-UTS-XGB")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 4) 是否保存结果，以及保存多少条
-MASTER_SAVE_SWITCH = False
+MASTER_SAVE_SWITCH = False      # 调参/测试阶段建议 False；满意后改为 True
 TOP_K_TO_SAVE = 200             # 保存 UTS_pred 最高的前 K 条方案
 
-# 5) 设计空间的手动覆盖
+# 5) 设计空间的手动覆盖（可选）
 #    - 不写的特征将自动使用 raw X_train 的 min/max
 FEATURE_BOUNDS_OVERRIDE: Dict[str, Tuple[float, float]] = {
+    "Si": (0.0, 0.15),
+    "Fe": (0.0, 0.15),
+    "Cr": (0.0, 0.3),
+    "V" : (0.0, 0.1),
+    "Zr": (0.0, 0.2),
+    "Li": (0.0, 0.0),
+    "Ni": (0.0, 0.2),
+    "Sc": (0.0, 0.0),
+    "Ag": (0.0, 0.0),
+    "Bi": (0.0, 0.0),
+    "Pb": (0.0, 0.0),
     "Ageing Time": (0.0, 48.0),
     # "Si": (0.0, 2.0),
     # "Mg": (0.0, 2.0),
@@ -49,18 +60,18 @@ FEATURE_BOUNDS_OVERRIDE: Dict[str, Tuple[float, float]] = {
 
 # 6) GA 参数
 POP_SIZE = 200             # 每一代的个体数量
-N_GENERATIONS = 2000         # 迭代次数
-ELITE_FRAC = 0.1           # 精英保留比例
+N_GENERATIONS = 1000         # 迭代次数
+ELITE_FRAC = 0.1           # 精英保留比例（前 10% 直接保留到下一代）
 TOURNAMENT_SIZE = 3        # 锦标赛选择的个体数量
 CROSSOVER_PROB = 0.9       # 发生交叉的概率
 MUTATION_PROB = 0.2        # 每个基因发生变异的概率
 MUTATION_RATE = 0.1        # 变异幅度（相对于特征范围的百分比）
 
-RANDOM_SEED = 42           # 全局随机种子
+RANDOM_SEED = 42           # 全局随机种子，保证可复现
 
-# 7) 约束相关设置
+# 7) 约束相关设置（实验可行性）
 #    - 成分约束：COMPOSITION_COLS 中所有元素质量分数之和 = 100（通过把 Al 作为余量强制满足）
-#    - 时效时间约束：Ageing Time ≤ AGEING_TIME_MAX
+#    - 时效时间约束：Ageing Time ≤ AGEING_TIME_MAX（并可选离散到 AGEING_TIME_STEP 便于实验）
 COMPOSITION_COLS: list[str] = [
     "Si", "Fe", "Cu", "Mn", "Mg", "Cr", "Zn", "V", "Ti", "Zr", "Li", "Ni", "Be", "Sc", "Ag", "Bi", "Pb", "Al"
 ]
@@ -71,7 +82,7 @@ AGEING_TIME_COL = "Ageing Time"
 AGEING_TIME_MAX = 48.0
 AGEING_TIME_STEP: Optional[float] = None   # 例如 1.0=按 1h 步长；若不想离散化，改为 None
 
-# 在 UTS 基本相同的情况下，轻微偏好更短的 Ageing Time（不改变“主目标是 UTS 最大化”）
+# 可选：在 UTS 基本相同的情况下，轻微偏好更短的 Ageing Time（不改变“主目标是 UTS 最大化”）
 PREFER_SHORT_AGEING_TIME = True
 PREFER_SHORT_AGEING_EPS = 1e-4   # 越小越“只做同分择优”
 
