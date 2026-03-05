@@ -3,10 +3,9 @@ import time
 import socket
 import subprocess
 from pathlib import Path
-
 import webview
 
-PORT = 8502
+PORT = 8503
 HOST = "127.0.0.1"
 
 
@@ -44,7 +43,7 @@ def wait_port(host: str, port: int, timeout: int = 25):
 
 def run_streamlit_server():
     # server 模式：在同一个 exe 的子进程中启动 Streamlit
-    app_path = resource_path("app-2.py")
+    app_path = resource_path("app-3.py")
 
     # 关键：禁用 file watcher，避免打包目录扫描导致 CPU 飙高
     sys.argv = [
