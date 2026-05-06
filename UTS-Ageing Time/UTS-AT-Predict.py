@@ -6,10 +6,10 @@ from pathlib import Path
 from datetime import datetime
 
 # ===================== 1) 配置区 =====================
-MODEL_PATH = r"/XGBoost/ElementTreatmentEl-UTS/output-exceptEL/XGB_best_model.joblib"
+MODEL_PATH = r"D:\MLDesignAl\TheFinal\XGBoost\ElementTreatmentEl-UTS\output-exceptEL\XGB_best_model.joblib"
 
 # 读取特征列
-TRAIN_X_PATH = r"/Data/ElementTreatmentEl-UTS/output-exceptEL/exceptEL-X_train_raw.csv"
+TRAIN_X_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train_raw.csv"
 
 # 如果 TRAIN_X_PATH 里包含目标列（例如UTS），就在这里写上列名以便剔除；否则留 None
 TARGET_COL = None
@@ -22,24 +22,24 @@ SAVE_TARGET = r"D:\MLDesignAl\TheFinal\UTS-Ageing Time"
 fixed_inputs = {
     "Si": 0.00,
     "Fe": 0.00,
-    "Cu": 2.49,
+    "Cu": 2.36,
     "Mn": 0.00,
-    "Mg": 2.60,
+    "Mg": 2.46,
     "Cr": 0.00,
-    "Zn": 7.27,
+    "Zn": 6.28,
     "V" : 0.00,
-    "Ti": 0.00,
-    "Zr": 0.00,
+    "Ti": 0.058,
+    "Zr": 0.14,
     "Li": 0.00,
     "Ni": 0.00,
     "Be": 0.00,
-    "Sc": 0.24,
+    "Sc": 0.00,
     "Ag": 0.00,
     "Bi": 0.00,
     "Pb": 0.00,
-    "Al": 87.40,
-    "SS Temp"    : 461,
-    "Ageing Temp": 123,
+    "Al": 88.702,
+    "SS Temp"    : 465,
+    "Ageing Temp": 120,
 }
 AGING_TIME_COL = "Ageing Time"
 

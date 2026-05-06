@@ -3,7 +3,7 @@
 """
 输出多目标强度的GA设计方案（基于已训练好的 XGBoost 模型）
 =====================================================================
-新增了“定点强度搜索（target UTS）”模式：
+新增“定点强度搜索（target UTS）”模式：
   - 给定多个目标强度 TARGET_UTS_LIST = [600, 500, 400, 300, 200]
   - 脚本会在一次运行中，依次对每个 target 做一轮 GA（适应度 = -|UTS_pred - target|）
   - 每个 target 输出：最接近该目标的 Top-N以及最佳方案
@@ -11,7 +11,6 @@
 """
 
 from __future__ import annotations
-
 from pathlib import Path
 from typing import Dict, Tuple, Optional, List
 import numpy as np
@@ -20,7 +19,7 @@ from joblib import load
 
 # ====================== 配置区 ======================
 
-# 1) 原始 X_train（未标准化版本）的路径 —— 用于估计范围 & 特征名
+# 1) 原始 X_train（未标准化版本）的路径
 RAW_X_TRAIN_PATH = r"D:\MLDesignAl\TheFinal\Data\ElementTreatmentEl-UTS\output-exceptEL\exceptEL-X_train_raw.csv"
 
 # 2) 训练好的 XGBoost 模型路径
@@ -31,7 +30,7 @@ OUTPUT_DIR = Path(r"D:\MLDesignAl\TheFinal\DesignSearch\Verify")
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
 # 4) 保存开关
-MASTER_SAVE_SWITCH = True
+MASTER_SAVE_SWITCH = False
 
 # 5) 多目标强度
 TARGET_UTS_LIST: List[float] = [600.0, 500.0, 400.0, 300.0, 200.0]
@@ -61,7 +60,7 @@ FEATURE_BOUNDS_OVERRIDE: Dict[str, Tuple[float, float]] = {
 
 # 7) GA 参数
 POP_SIZE = 200
-N_GENERATIONS_PER_TARGET = 500        # 每个目标强度的迭代代数（建议先 300~600 试跑）
+N_GENERATIONS_PER_TARGET = 1000
 ELITE_FRAC = 0.1
 TOURNAMENT_SIZE = 3
 CROSSOVER_PROB = 0.9
